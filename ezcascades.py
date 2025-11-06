@@ -1,9 +1,11 @@
 # initialise
-import os, sys, json, glob
+import os
+import sys
+import json
+import glob
 import numpy as np
 from scipy.spatial import cKDTree
 
-#from lib.eaminfo import Import_eamfs
 from lib.eam_info import eam_info
 from lib.lindhard import Lindhard, quickdamage
 from lib.helperfuncs import sample_spherical, get_dump_frame, is_triclinic 
@@ -126,7 +128,7 @@ def main():
             if os.path.exists(restartpath):
                 announce ("Found restart file: %s" % restartpath)
             else:
-                announce ("Restart file %s not found. Starting new simulation." % restartpath)
+                announce ("Casacade restart file %s not found. Starting new simulation." % restartpath)
                 restartpath = None
             restartfile = restartpath
             
@@ -375,7 +377,7 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % tem
 
     # read restart file and continue simulation from there, if available 
     if restartfile:
-        announce("Restarting from file: %s" % restartfile)
+        announce("Restarting from last cascade file: %s" % restartfile)
         lmp.command('read_data %s' % restartfile)
 
         # import log file and fetch last dose
@@ -388,7 +390,10 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % tem
 
     elif initial:
         # otherwise look for an initial file
-        announce("Starting from file: %s" % initial)
+        announce("Initialising structure from file: %s" % initial)
+
+        # if neither initial nor restartfile have been given, initiate single crystal
+        lmp.command('create_box %d r_simbox' % nelements) 
 
         if initialtype == "data":
             lmp.command('read_data %s' % initial)
