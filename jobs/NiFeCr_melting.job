@@ -30,7 +30,7 @@ source ~/py39cpu/bin/activate
 application="python getmelt.py"
 
 #! Run options for the application:
-options="json/NiFeCr_melting.json"
+jsonfile="json/NiFeCr_melting.json"
 
 #! Work directory (i.e. where the job will run):
 workdir="/home/dc-bole2/Simulations/SingleCascade/"
@@ -53,22 +53,21 @@ export I_MPI_PIN_ORDER=scatter # Adjacent domains have minimal sharing of caches
 #! 3. I_MPI_PIN_PROCESSOR_LIST is ignored if I_MPI_PIN_DOMAIN is set.
 #! 4. If MPI tasks perform better when sharing caches/sockets, try I_MPI_PIN_ORDER=compact.
 
-
-#! Uncomment one choice for CMD below (add mpirun/mpiexec options if necessary):
+#! Uncomment the command appropriate for your system (add mpirun/mpiexec options if necessary):
 
 #! Choose this for a MPI code (possibly using OpenMP) using Intel MPI.
-CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
+CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application"
 
 #! Choose this for a pure shared-memory OpenMP parallel program on a single node:
 #! (OMP_NUM_THREADS threads will be created):
-#CMD="$application $options"
+#CMD="$application"
 
 #! Choose this for a MPI code (possibly using OpenMP) using OpenMPI:
-#CMD="mpirun -npernode $mpi_tasks_per_node -np $np $application $options"
+#CMD="mpirun -npernode $mpi_tasks_per_node -np $np $application"
 
 
 ###############################################################
-### You should not have to change anything below this line ####
+### You should not have to change anything in this section ####
 ###############################################################
 
 cd $workdir
@@ -93,44 +92,54 @@ echo -e "\nnumtasks=$numtasks, numnodes=$numnodes, mpi_tasks_per_node=$mpi_tasks
 
 echo -e "\nExecuting command:\n==================\n$CMD\n"
 
+##########################################################################
+### Below the cascade energies and associated system sizes are defined ###
+##########################################################################
+
 for epka in `seq 0.1 0.1 1.0`;
-do  
-    options="json/NiFeCr_melting.json -bdim 10 10 10 -epka ${epka}"
-    CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
-    eval $CMD 
+do 
+    boxsize=10
+    options="${jsonfile} -bdim ${boxsize} ${boxsize} ${boxsize} -epka ${epka}"
+    RCMD="${CMD} ${options}"
+    eval $RCMD 
 done
 
 for epka in `seq 1.0 1.0 10.0`;
 do  
-    options="json/NiFeCr_melting.json -bdim 12 12 12 -epka ${epka}"
-    CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
-    eval $CMD 
+    boxsize=12
+    options="${jsonfile} -bdim ${boxsize} ${boxsize} ${boxsize} -epka ${epka}"
+    RCMD="${CMD} ${options}"
+    eval $RCMD 
 done
 
 for epka in `seq 10.0 10.0 100.0`;
 do  
-    options="json/NiFeCr_melting.json -bdim 12 12 12 -epka ${epka}"
-    CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
-    eval $CMD 
+    boxsize=12
+    options="${jsonfile} -bdim ${boxsize} ${boxsize} ${boxsize} -epka ${epka}"
+    RCMD="${CMD} ${options}"
+    eval $RCMD 
 done
 
 for epka in `seq 100.0 100.0 1000.0`;
 do  
-    options="json/NiFeCr_melting.json -bdim 20 20 20 -epka ${epka}"
-    CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
-    eval $CMD 
+    boxsize=20
+    options="${jsonfile} -bdim ${boxsize} ${boxsize} ${boxsize} -epka ${epka}"
+    RCMD="${CMD} ${options}"
+    eval $RCMD 
 done
 
 for epka in `seq 1000.0 1000.0 10000.0`;
-do  
-    options="json/NiFeCr_melting.json -bdim 42 42 42 -epka ${epka}"
-    CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
-    eval $CMD 
+do 
+    boxsize=42
+    options="${jsonfile} -bdim ${boxsize} ${boxsize} ${boxsize} -epka ${epka}"
+    RCMD="${CMD} ${options}"
+    eval $RCMD 
 done
 
 for epka in `seq 10000.0 10000.0 100000.0`;
 do  
-    options="json/NiFeCr_melting.json -bdim 80 80 80 -epka ${epka}"
-    CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
-    eval $CMD 
+    boxsize=80
+    options="${jsonfile} -bdim ${boxsize} ${boxsize} ${boxsize} -epka ${epka}"
+    RCMD="${CMD} ${options}"
+    eval $RCMD 
 done

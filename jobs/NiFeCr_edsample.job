@@ -29,8 +29,8 @@ source ~/py39cpu/bin/activate
 #! Full path to application executable: 
 application="python geted.py"
 
-#! Run options for the application:
-options="json/NiFeCr_edsample.json"
+#! Full path to the json input file:
+options="json/NiFeCr_fpsample.json"
 
 #! Work directory (i.e. where the job will run):
 workdir="/home/dc-bole2/Simulations/SingleCascade/"
@@ -54,7 +54,7 @@ export I_MPI_PIN_ORDER=scatter # Adjacent domains have minimal sharing of caches
 #! 4. If MPI tasks perform better when sharing caches/sockets, try I_MPI_PIN_ORDER=compact.
 
 
-#! Uncomment one choice for CMD below (add mpirun/mpiexec options if necessary):
+#! Uncomment the command appropriate for your system (add mpirun/mpiexec options if necessary):
 
 #! Choose this for a MPI code (possibly using OpenMP) using Intel MPI.
 CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
@@ -68,7 +68,7 @@ CMD="mpirun -ppn $mpi_tasks_per_node -np $np $application $options"
 
 
 ###############################################################
-### You should not have to change anything below this line ####
+### You should not have to change anything in this section ####
 ###############################################################
 
 cd $workdir
@@ -91,6 +91,15 @@ fi
 
 echo -e "\nnumtasks=$numtasks, numnodes=$numnodes, mpi_tasks_per_node=$mpi_tasks_per_node (OMP_NUM_THREADS=$OMP_NUM_THREADS)"
 
-mpirun -ppn $mpi_tasks_per_node -np $np ${application} ${options} -bdim 10 8 8    -emin 14.0 -emax 20.0  -edel 0.25 -ns 100 -rpw 14
-mpirun -ppn $mpi_tasks_per_node -np $np ${application} ${options} -bdim 10 8 8    -emin 20.0 -emax 40.0  -edel 0.50 -ns 100 -rpw 14
-mpirun -ppn $mpi_tasks_per_node -np $np ${application} ${options} -bdim 12 10 10  -emin 40.0 -emax 100.0 -edel 1.00 -ns 100 -rpw 14
+##########################################################################
+### Below the cascade energies and associated system sizes are defined ###
+##########################################################################
+
+RCMD="${CMD} -bdim 10 8 8   -emin 14.0 -emax 20.0  -edel 0.25 -ns 100 -rpw 14"
+eval $RCMD
+
+RCMD="${CMD} -bdim 10 8 8   -emin 20.0 -emax 40.0  -edel 0.50 -ns 100 -rpw 14"
+eval $RCMD
+
+RCMD="${CMD} -bdim 12 10 10 -emin 40.0 -emax 100.0 -edel 1.00 -ns 100 -rpw 14"
+eval $RCMD
