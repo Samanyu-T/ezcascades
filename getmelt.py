@@ -313,16 +313,19 @@ def main():
 
             for _type in range(nelements):
                 indices = tuple(1 + np.where(composition_array == _type)[0])
-                lmp.command('group gtype id' + " %d"*len(indices) % indices)
-                lmp.command('set group gtype type %d' % (1+_type))
-                lmp.command('group gtype delete')
+
+                if len(indices) > 0:
+                    lmp.command('group gtype id' + " %d"*len(indices) % indices)
+                    lmp.command('set group gtype type %d' % (1+_type))
+                    lmp.command('group gtype delete')
         else:
             lmp.command('create_box 1 r_simbox')
             lmp.command('create_atoms %d region r_simbox' % atype)
 
         # just a hack to handle alloys
+        pottype = potfile.split('.')[-1]
         if alloy:
-            lmp.command('pair_style eam/alloy')
+            lmp.command('pair_style eam/%s' % pottype)
             lmp.command(('pair_coeff * * %s ' % potfile) + '%s '*nelements % tuple(potential.ele))
 
             # overwrite default masses

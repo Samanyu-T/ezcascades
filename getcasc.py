@@ -360,18 +360,20 @@ def main():
                 ngroups = int(len(indices)/maxgroupsize + 1)
                 c = 0
                 for _subindices in np.array_split(indices, ngroups):
-                    mpiprint ("Batch %d out of %d..." % (c, ngroups))
-                    lmp.command('group gtype id' + " %d"*len(_subindices) % tuple(_subindices))
-                    lmp.command('set group gtype type %d' % (1+_type))
-                    lmp.command('group gtype delete')
-                    c += 1
+                    if len(_subindices) > 0:
+                        mpiprint ("Batch %d out of %d..." % (c, ngroups))
+                        lmp.command('group gtype id' + " %d"*len(_subindices) % tuple(_subindices))
+                        lmp.command('set group gtype type %d' % (1+_type))
+                        lmp.command('group gtype delete')
+                        c += 1
         else:
             lmp.command('create_box 1 r_simbox')
             lmp.command('create_atoms %d region r_simbox' % atype)
 
         # just a hack to handle alloys
+        pottype = potfile.split('.')[-1]
         if alloy:
-            lmp.command('pair_style eam/alloy')
+            lmp.command('pair_style eam/%s' % pottype)
             lmp.command(('pair_coeff * * %s ' % potfile) + '%s '*nelements % tuple(potential.ele))
 
             # overwrite default masses
@@ -379,7 +381,7 @@ def main():
                 lmp.command('mass %d %f' % (1+_i, _m)) 
         else:
             #lmp.command('mass            1 %f' % mass)
-            lmp.command('pair_style eam/fs')
+            lmp.command('pair_style eam/%s' % pottype)
             lmp.command('pair_coeff * * %s %s' % (potfile, ele))
         lmp.command('neighbor 3.0 bin')
 

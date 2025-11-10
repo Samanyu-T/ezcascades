@@ -451,7 +451,9 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % tem
         iteration = 0
 
     # load potential
-    lmp.command('pair_style eam/alloy')
+    pottype = potfile.split('.')[-1]
+
+    lmp.command('pair_style eam/%s' % pottype)
     lmp.command(('pair_coeff * * %s ' % potfile) + '%s '*nelements % tuple(potential.ele))
 
     # overwrite default masses
