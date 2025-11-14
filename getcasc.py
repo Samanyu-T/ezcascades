@@ -1,5 +1,5 @@
 # initialise
-import os, sys, json, glob
+import os, sys, json, glob, random
 import numpy as np
 from scipy.spatial import cKDTree
 
@@ -59,6 +59,11 @@ class RawFormatter(argparse.HelpFormatter):
     def _fill_text(self, text, width, indent):
         return "\n".join([textwrap.fill(line, width) for line in textwrap.indent(textwrap.dedent(text), indent).splitlines()])
 
+def get_dump_frame(fpath):
+    with open(fpath, 'r') as fp:
+        fp.readline()
+        frame = int(fp.readline())
+    return frame
 
 def main():
     program_descripton = f'''
@@ -179,7 +184,7 @@ def main():
                 return 0
 
 
-    # -------------------
+    # ------------------- f
     #  INPUT POTENTIAL 
     # ------------------- 
 
@@ -297,6 +302,22 @@ def main():
 
     for _it in range(logindex, maxruns):
 
+        initfile = False
+        
+        if me == 0:
+            if "initfile" in all_input:
+                initfile_bool = all_input["initfile"]
+                if initfile_bool:
+                    initfile_lst = glob.glob(all_input["initfile"])
+                    if len(initfile_lst) > 0:
+                        initfile = random.choice(initfile_lst)
+                        print("The initial file is %s" % initfile)
+
+                    else:
+                        print("ERROR: No files found in location %s, intializing with a perfect crystal instead" % initfile_bool)
+        comm.barrier()
+
+        initfile = comm.bcast(initfile, root = 0)
         # Start LAMMPS instance
         lmp = lammps()
 
@@ -331,44 +352,52 @@ def main():
             rnglist = None
         rnglist = comm.bcast(rnglist, root=0)
         comm.barrier()
+        
+        nelements = len(potential.ele)
 
-        if alloy: 
-            nelements = len(potential.ele)
-            lmp.command('create_box %d r_simbox' % nelements) 
+        if initfile:
+                
+            lmp.command('create_box %d r_simbox' % nelements)
+            iframe = get_dump_frame(initfile)
+            lmp.command('read_dump %s %d x y z add keep box yes' % (initfile, iframe))
 
-            # initialise atoms as most common species
-            commontype = np.argmax(list(composition.values()))
-            announce ("Initialising all atoms to the largest type: %d" % commontype)
-            lmp.command('create_atoms %d region r_simbox' % (1+commontype))
-            natoms = lmp.extract_global("natoms", 0)
-
-            if (me == 0):
-                composition_array = np.random.choice(np.r_[:nelements], size=natoms, p=list(composition.values()))
-            else:
-                composition_array = None
-            composition_array = comm.bcast (composition_array, root=0)
-
-            # then set the remaining atomic species
-            for _type in range(nelements):
-                if _type == commontype:
-                    continue
-                indices = tuple(1 + np.where(composition_array == _type)[0])
-                announce ("Changing %d atoms to type: %d" % (len(indices), _type))
-
-                # work in batches, not setting too large groups a time
-                maxgroupsize = 10000
-                ngroups = int(len(indices)/maxgroupsize + 1)
-                c = 0
-                for _subindices in np.array_split(indices, ngroups):
-                    if len(_subindices) > 0:
-                        mpiprint ("Batch %d out of %d..." % (c, ngroups))
-                        lmp.command('group gtype id' + " %d"*len(_subindices) % tuple(_subindices))
-                        lmp.command('set group gtype type %d' % (1+_type))
-                        lmp.command('group gtype delete')
-                        c += 1
         else:
-            lmp.command('create_box 1 r_simbox')
-            lmp.command('create_atoms %d region r_simbox' % atype)
+            if alloy: 
+                lmp.command('create_box %d r_simbox' % nelements) 
+
+                # initialise atoms as most common species
+                commontype = np.argmax(list(composition.values()))
+                announce ("Initialising all atoms to the largest type: %d" % commontype)
+                lmp.command('create_atoms %d region r_simbox' % (1+commontype))
+                natoms = lmp.extract_global("natoms", 0)
+
+                if (me == 0):
+                    composition_array = np.random.choice(np.r_[:nelements], size=natoms, p=list(composition.values()))
+                else:
+                    composition_array = None
+                composition_array = comm.bcast (composition_array, root=0)
+
+                # then set the remaining atomic species
+                for _type in range(nelements):
+                    if _type == commontype:
+                        continue
+                    indices = tuple(1 + np.where(composition_array == _type)[0])
+                    announce ("Changing %d atoms to type: %d" % (len(indices), _type))
+
+                    # work in batches, not setting too large groups a time
+                    maxgroupsize = 10000
+                    ngroups = int(len(indices)/maxgroupsize + 1)
+                    c = 0
+                    for _subindices in np.array_split(indices, ngroups):
+                        if len(_subindices) > 0:
+                            mpiprint ("Batch %d out of %d..." % (c, ngroups))
+                            lmp.command('group gtype id' + " %d"*len(_subindices) % tuple(_subindices))
+                            lmp.command('set group gtype type %d' % (1+_type))
+                            lmp.command('group gtype delete')
+                            c += 1
+            else:
+                lmp.command('create_box %d r_simbox' % nelements)
+                lmp.command('create_atoms %d region r_simbox' % atype)
 
         # just a hack to handle alloys
         pottype = potfile.split('.')[-1]
@@ -380,7 +409,7 @@ def main():
             for _i,_m in enumerate(masses.values()):
                 lmp.command('mass %d %f' % (1+_i, _m)) 
         else:
-            #lmp.command('mass            1 %f' % mass)
+            # lmp.command('mass            1 %f' % mass)
             lmp.command('pair_style eam/%s' % pottype)
             lmp.command('pair_coeff * * %s %s' % (potfile, ele))
         lmp.command('neighbor 3.0 bin')
@@ -478,10 +507,13 @@ def main():
         else:
             kickindex = None
             vvec = None
+            _type = None
+
         comm.barrier()
        
         kickindex = comm.bcast(kickindex, root=0)
         vvec = comm.bcast(vvec, root=0)
+        _type = comm.bcast(_type, root=0)
 
         # apply random kick
         announce ("Kicking atom ID %d of type %d at (%12.6f %12.6f %12.6f) by %12.6f Ang/ps." % (1+kickindex, 1+_type, _x0[kickindex][0], 

@@ -1,0 +1,56 @@
+{
+    "job_name": "CRA_1keV_Test",
+    "potential_path": "/lustre/home/cd8607/cascade_model/potentials/",
+    "scratch_dir": "./data/", 
+    "sim_dir": "./",
+    "potential": "WHHe_TMB.eam.he",
+
+    "composition": {"1":  1.0},
+    "masses": {"1": 183.84},
+    "znums": {"1": 74},
+
+    "write_data": 1,
+    "simulation_clear": 0,
+    "export_nth": 1,
+
+    "max_steps": 50000,
+    "etol": "1e-12",
+    "boxstress": {"x": 0.0, "y": 0.0, "z": 0.0},
+
+    "PKAfile": "./pkafiles/1000.0eV.pka",
+    "PKAmin": 50.0,
+    "PKAmax": 100000.0,
+    "edavg": 90.0,
+
+    "maxdpa": 1.0,
+    "incrementdpa": 0.0002,
+
+    "temperature": 0.0,
+    "melting_temperature": 3500.0,
+    "electronic_stopping_threshold": 10.0,
+
+    "runCG": 1,
+
+    "nx": 50,
+    "ny": 50,
+    "nz": 50,
+
+    "ix": [
+        1,
+        0,
+        0
+    ],
+    "iy": [
+        0,
+        1,
+        0
+    ],
+    "iz": [
+        0,
+        0,
+        1
+    ],
+
+    "initial": 0,
+    "initialtype": 0
+}
