@@ -47,6 +47,6 @@ Note that some HPC systems do not permit executing parallel processes on the log
 
 ## Further information
 
-See the [project Wiki](../../wiki) for detailed information on features, installation, file structures, and working examples.
+See the [project Wiki](../../wiki) for detailed information on features, file structures, and working examples.
 
 
