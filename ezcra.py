@@ -226,34 +226,11 @@ def main():
     else:
         initial = None
 
-    # temperature in kelvin
-    temp = all_input["temperature"]
-    if temp < 1e-9:
-        athermal = True
-    else:
-        athermal = False
 
+    athermal = True
     # whether to run CG after each cascade propagation step
     runCG = True
 
-    if runCG and not athermal:
-        announce ('''WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
- 
-This is a finite temperature run where atomic coordinates are relaxed to a local
-energy minimum with the conjugate gradient method after each cascade iteration:
-
-\t('temp': %f with 'runCG': 1)!
-
-This may lead to odd effects, as velocities are zeroed and thermal vibrations removed after every
-cascade iteration. Consider running either an athermal simulation:
-
-\t('temp': 0.0 with 'runCG': 1)
-
-or a thermal simulation:
-
-\t('temp'> 0.0 with 'runCG': 0)
-
-WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % temp)
 
     # ------------------------------
     #  COLLISION CASCADE PARAMETERS
@@ -528,29 +505,8 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % tem
           
     # initialise velocities and thermalise if this is a finite temperature run
     if not restartfile:
-        if athermal:
-            lmp.command('velocity all create 0.0 1 mom yes rot no')
-        else:
-            rndnumber = None
-            if (me == 0):
-                rndnumber = np.random.randint(1e8)
-            rndnumber = comm.bcast(rndnumber, root=0)
 
-            announce("Initialising random velocities with random number: %d" % rndnumber)
-            lmp.command('velocity all create %f %d mom yes rot no' % (2*temp, rndnumber))
-
-            # thermalisation here
-            if "thermalisation_time" not in all_input:
-                tthermal = 50.0 # default: 50 picoseconds
-            else:
-                tthermal = all_input["thermalisation_time"]
-
-            announce ("Thermalising for %f picoseconds." % tthermal)
-            lmp.command('run %d' % int(tthermal/timestep)) 
-            
-            # reset timestep and wrap atoms back into box
-            lmp.command('reset_timestep 0')
-            lmp.command('run 0')
+        lmp.command('velocity all create 0.0 1 mom yes rot no')
 
         # print out first dump
         if all_input['write_data']:
@@ -858,9 +814,6 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % tem
                 else:
                     for sij in boxstress:
                         lmp.command('unfix f%sfree' % sij)
-        elif not athermal:
-            # otherwise just rescale velocities to avoid temperature drift
-            lmp.command('velocity all scale %f' % temp)
 
         # wrap atoms back into the box
         # lmp.command('unfix ftimestep')
