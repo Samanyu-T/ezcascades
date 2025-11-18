@@ -10,8 +10,7 @@
     "masses": {"1": 58.6934, "2": 55.845, "3": 51.9961},
 
     "write_data": 0,
-    "relax_clear": 0,
-
+    "simulation_clear": 0,
 
     "max_steps": 50000,
 
