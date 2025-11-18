@@ -25,9 +25,9 @@ The collection contains the following scripts for high-dose simulations:
 * [ezcra.py: High-dose simulations via creation relaxation algorithm](../../wiki/High‐dose:-Creation-relaxation-algorithm)
 
 The collection also contains single-cascade scripts:
-* `geted.py`:   single-cascade simulations for obtaining displacement threshold statistics
-* `getcasc.py`: single-cascade simulations for obtaining Frenkel pair generation statistics
-* `getmelt.py`: single-cascade simulations for obtaining cascade melt size statistics
+* [geted.py: Single-cascade simulations for obtaining displacement threshold statistics](../../wiki/Single-cascade:-Displacement-threshold-statistics)
+* [getcasc.py: Single-cascade simulations for obtaining Frenkel pair generation statistics](../../wiki/Single-cascade:-Defect-generation-statistics)
+* [getmelt.py: Single-cascade simulations for obtaining cascade melt size statistics](../../wiki/Single-cascade:-Melt-size-statistics)
 
 ## Getting started
 
