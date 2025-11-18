@@ -27,7 +27,7 @@
     "langevin_damping_time": 5.0,
     "electronic_stopping_threshold": 10.0,
 
-    "stoppingfile": "/home/dc-bole2/Simulations/SingleCascade/stoppingfiles/NiFeCr.dat",
+    "stoppingfile": "./stoppingfiles/NiFeCr.dat",
 
     "Tmelt": 1500.0,
 
