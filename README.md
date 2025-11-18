@@ -56,8 +56,13 @@ OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (../comm.cpp:99)
 From LAMMPS: Hello World. You should see this message only once.
 Total wall time: 0:00:00
 ```
+Python should report the correct number of ranks, and LAMMPS should only print out once irrespective of the number of ranks. Some HPC systems do not permit executing parallel processes on the login node. In that case, you can test the configuration by submitting this script as a batch job.
 
-Python should report the correct number of ranks, and LAMMPS should only print out once irrespective of the number of ranks. Note that some HPC systems do not permit executing parallel processes on the login node. In that case, you can test the configuration by submitting this script as a batch job.
+The scripts in this repository assume a standard LAMMPS compilation. If you compiled your LAMMPS shared library under a different name, or you want to use accelerators (INTEL, GPU, ...), you will have to update the LAMMPS instantiations as appropriate. Some example instantiations are below:
+```
+lmp = lammps("gpu", cmdargs=["-sf", "gpu", "-pk", "gpu 1"])    # GPU package
+lmp = lammps(cmdargs=["-pk", "intel 0 omp 2", "-sf", "intel"]) # INTEL package
+```
 
 ## Further information
 
