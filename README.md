@@ -33,7 +33,7 @@ The collection also contains single-cascade scripts:
 
 To get started, you need to build LAMMPS with the EXTRA-FIX package for electronic stopping, and optionally with the MANYBODY package to enable embedded atom model potentials (or other for machine-learned potentials). LAMMPS must be compiled as a shared library linked to Python 3+ with the numpy, scipy, and mpi4py packages. See the [LAMMPS documentation](https://docs.lammps.org/Python_head.html) for more information on how to set this up. To avoid compatability issues, the Python environment should be set up with the same modules (compilers, MPI version, ...) used for compiling the LAMMPS shared library. In many HPC systems, you can set up the Python environment locally as a virtual environment, installing the neccessary package via the `pip` command. 
 
-Once LAMMPS is set up, clone this repository
+Once your environment is set up, clone this repository
 ```shell
 $ git clone https://github.com/mb4512/ezcascades.git
 ```
