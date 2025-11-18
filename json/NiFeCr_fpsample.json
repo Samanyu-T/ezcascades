@@ -35,8 +35,6 @@
     "target_stderr": 5.0,
     "maxruns": 100,
     "runCG": 1,
-   
-    "eVPKA": 200.000,
 
     "nx": 12,
     "ny": 12,
