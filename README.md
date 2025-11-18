@@ -40,10 +40,24 @@ $ git clone https://github.com/mb4512/ezcascades.git
 
 You can test if your Python, mpi4py, LAMMPS environment works with the script **TODO**
 ```shell
-$ mpirun -n 4 python tests/mpitest.py
+$ mpirun -n 4 python test.py
 ```
 
-Note that some HPC systems do not permit executing parallel processes on the login node. In that case, you can test the configuration by submitting this script as a batch job.
+Your output should show something along the lines:
+```
+From Python: I am rank 0 out of 4.
+From Python: I am rank 2 out of 4.
+From Python: I am rank 3 out of 4.
+From Python: I am rank 1 out of 4.
+LAMMPS (29 Aug 2024 - Development - patch_29Aug2024-704-g6d0e633edf)
+WARNING: Using I/O redirection is unreliable with parallel runs. Better to use the -in switch to read input files. (../lammps.cpp:571)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (../comm.cpp:99)
+  using 1 OpenMP thread(s) per MPI task
+From LAMMPS: Hello World. You should see this message only once.
+Total wall time: 0:00:00
+```
+
+Python should report the correct number of ranks, and LAMMPS should only print out once irrespective of the number of ranks. Note that some HPC systems do not permit executing parallel processes on the login node. In that case, you can test the configuration by submitting this script as a batch job.
 
 ## Further information
 
