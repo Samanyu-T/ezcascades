@@ -38,7 +38,7 @@ Once your environment is set up, clone this repository
 $ git clone https://github.com/mb4512/ezcascades.git
 ```
 
-You can test if your Python, mpi4py, LAMMPS environment works with the script **TODO**
+You can test if your Python, mpi4py, LAMMPS environment is working with the supplied script:
 ```shell
 $ mpirun -n 4 python test.py
 ```
