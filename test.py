@@ -31,7 +31,7 @@ def mpiprint(*arg):
 def main():
 
     sys.stdout.flush()
-    print ("From Python: I am rank %d out of %d." % (me, nprocs))
+    print ("From Python: I am rank ID %d out of %d ranks." % (me, nprocs))
     sys.stdout.flush()
 
     lmp = lammps()

@@ -702,7 +702,7 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % tem
                 cascade_pka = []
 
                 # lower limit: higher than dose limit
-                while (appdose <= (1.0-incrtol)*doselimit):
+                while (appdose <= max(0, (1.0-incrtol)*doselimit)):
                     epka = 0.
                     while (epka <= pkamin) or (epka > pkamax):
                         epka = np.random.choice(pkas)
@@ -716,16 +716,24 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % tem
                     appdose = np.sum(ndefects/N)
 
                 nattempts += 1
-                if nattempts >= 1000:
+                if nattempts == 1000:
                     print ()
                     print ("Could not draw damage energies within the range of [%3.2f*doseincrement, %3.2f*doseincrement] after %d attempts!" % (1.0-incrtol, 1.2+incrtol, nattempts))
-                    incrtol += 0.1
-                    print ("Increasing interval range.")
+                    print ("Proceeding to increase the acceptable dose range until damage energies can be drawn.")
                     print ()
+                    
+                if nattempts >= 1000:
+                    incrtol += 0.1
+                    
+                if appdose > 1.5*incrementdpa:
+                    print ("Error: could not accomodate recoil energise without exceeding 1.5 times the dose increment (c.f. %f vs %f dpa)!" % (appdose, incrementdpa))
+                    print ("Your system might be too small to accomodate such large cascades. Consider increasing the system size.")
+                    sys.stdout.flush()
+                    return 0 
 
-            print ("Dose increment:", appdose)
-
-
+            print ("Final range: [%3.2f*doseincrement, %3.2f*doseincrement] after %d attempts." % (1.0-incrtol, 1.2+incrtol, nattempts))
+            print ("Selecting recoils corresponding to a dose increment of: %f dpa" % appdose)
+            
             # sort PKA energies in descending order to ensure we can fit in the largest cascades
             cascade_pka = np.flip(np.sort(cascade_pka))
             ncascades = len(cascade_pka)
