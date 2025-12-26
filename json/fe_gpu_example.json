@@ -22,7 +22,7 @@
     "average_over_fs": 30.0,
     "export_momentary_trajectories": 0,
     "export_averaged_trajectories": 1,
-    "export_trajectories_nth": 1,
+    "export_trajectories_nth": 5,
     "export_descriptors_nth": 500,
     "voxelgrid": [2,2,2],
     "descriptor_computes": {
