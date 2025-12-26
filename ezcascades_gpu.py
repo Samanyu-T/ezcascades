@@ -612,9 +612,46 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING''' % tem
             lmp.command('reset_timestep 0')
             lmp.command('run 0')
 
+            ###########################
+            # ATOMIC DESCRIPTOR START #
+            ########################### 
+
+            # Initialise descriptors 
+            voxeldescriptors = Voxel_Descriptors (all_input, lmp, nvox=all_input["voxelgrid"], mpi_comm=comm)
+
+            # thermo commands
+            lmp.command(f'thermo {voxeldescriptors.export_descriptors_nth}')
+            lmp.command('thermo_style custom step time temp press pe ke pxx pyy pzz pxy pxz pyz lx ly lz')
+            lmp.command("thermo_modify line one format line '%8d %7.3f %6.3f %11.3e %15.8e %15.8e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %7.3f %7.3f %7.3f'")
+
+            lmp.command('run 0')
+            lmp.command(f'run {voxeldescriptors.export_descriptors_nth} pre no post no') # propagate simulation (variables are not current after this)
+
+            voxeldescriptors.are_all_atoms_accounted () # make variables current, check for internal consistency 
+            voxeldescriptors.set_atoms_to_averaged ()   # replace momentary atomic coordinates with time-averaged coordinates
+
+            if all_input["export_averaged_trajectories"]:
+                lmp.command(f"write_dump all custom {scrdir}/{job_name}/{job_name}.ave.{iteration}.dump id type x y z")
+
+            voxeldescriptors.evaluate () # evaluate voxel descriptors with time-averaged coordinates
+
+            voxeldescriptors.export_computes (f"{scrdir}/{job_name}/{job_name}.{iteration}.dsc", "%d %f" % (iteration, 0.0), exporting_rank=0) # export descriptors to file
+            voxeldescriptors.return_atoms_from_averaged ()  # restore atoms back to momentary coordinates
+            voxeldescriptors.purge_all ()                   # clean-up in preparation for cascade run
+
+            lmp.command('reset_timestep 0')
+            lmp.command('run 0')
+
+            #########################
+            # ATOMIC DESCRIPTOR END #
+            ######################### 
+
+
         # print out first dump
         if all_input['write_data']:
             lmp.command('write_dump all custom %s/%s/%s.%d.dump id type x y z' % (scrdir, job_name, job_name, iteration))
+
+
 
 
     # lindhard electronic stopping model for damage energy
