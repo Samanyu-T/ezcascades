@@ -86,6 +86,38 @@ fe_gpu_example.3.dsc
 ```
 One descriptor file is exported after each cascade iteration. The format is as stated in the file. Note the new settings in `json/fe_gpu_example.json` that control the descriptor evaluation, in particular: `average_over_fs`, which is the number of femtoseconds over which atomic trajectories are averaged before descriptors are computed, `voxelgrid`, which is the number of voxels in x, y, and z direction (aim for 10,000 atoms per voxel), and `descriptor_computes`, which lists the LAMMPS computes by which the descriptors are defined (the first entry, 'D', 'dD', 'ddD', is an identifying label set by the user and can be any string, while the following string specifies the LAMMPS command defining the corresponding compute).
 
+## Setting up LAMMPS on PITAGORA
+
+The below commands are for setting up LAMMPS as a shared library for a virtual environment in Python on the PITAGORA cluster. This installs the SNAP package for evaluating atomic descriptors and the GPU package. 
+
+```
+module load cmake
+module load py-mpi4py/3.1.5--openmpi--4.1.6--oneapi--2024.1.0
+module load cuda/12.6
+
+cd ~
+python -m venv pycuda
+source pycuda/bin/activate
+
+source pycuda/bin/activate
+pip install --upgrade pip
+pip install numpy scipy
+
+cd ~
+mkdir git
+git clone https://github.com/lammps/lammps.git lammps
+cd lammps
+mkdir build
+
+module load cmake
+cmake -D PKG_ML-SNAP=ON -D PKG_EXTRA-FIX=ON -D PKG_MANYBODY=ON -D PKG_REPLICA=ON -D PKG_GPU=ON -D GPU_API=CUDA -D BUILD_OMP=ON -D LAMMPS_MACHINE=gpu-cuda ../cmake
+cmake --build . -j 8
+
+cmake -D PKG_ML-SNAP=ON -D PKG_EXTRA-FIX=ON -D PKG_MANYBODY=ON -D PKG_REPLICA=ON -D PKG_GPU=ON -D GPU_API=CUDA -D BUILD_OMP=ON -D LAMMPS_MACHINE=gpu-cuda -D BUILD_SHARED_LIBS=yes ../cmake
+cmake --build . -j 8
+cmake --build . --target install-python
+```
+
 ## Further information
 
 See the [project Wiki](../../wiki) for detailed information on features, file structures, and working examples.
