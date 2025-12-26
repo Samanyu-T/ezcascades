@@ -24,7 +24,7 @@
     "export_averaged_trajectories": 1,
     "export_trajectories_nth": 1,
     "export_descriptors_nth": 500,
-    "voxelgrid": [18,18,18],
+    "voxelgrid": [2,2,2],
     "descriptor_computes": {
         "D": "sna/atom 5.8 0.99363 8 0.5 1", 
         "dD": "snad/atom 5.8 0.99363 8 0.5 1", 
